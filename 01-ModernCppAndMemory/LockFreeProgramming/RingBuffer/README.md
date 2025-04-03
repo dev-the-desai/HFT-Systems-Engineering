@@ -49,12 +49,6 @@ Note: In high-contention scenarios, work distribution may be uneven among consum
 
 ### Multi-Threaded Performance
 
-| Configuration | Items/sec  | Notes                     |
-|---------------|------------|---------------------------|
-| 1p-1c (1024)  | ~234K/sec  | Baseline configuration    |
-| 2p-2c (1024)  | ~200K/sec  | Slightly lower due to contention |
-| 1p-4c (1024)  | ~133K/sec  | One consumer tends to process most items |
-
 | Configuration    |  Items/sec     | Notes             |
 |------------------|----------------|-------------------|
 | 1p-1c (1024)     |  179.2K/s      | 1 producer, 1 consumer |
