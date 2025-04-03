@@ -1,17 +1,11 @@
-"# Build directories" 
-"build/" 
-"*/build/" 
-"*/*/build/" 
-"*/*/*/build/" 
-"*/*/*/*/build/" 
-"" 
-"# Explicitly exclude Google repos" 
-"**/googlebenchmark-src/" 
-"**/googletest-src/" 
-"" 
-"# Dependencies directories" 
-"_deps/" 
-"*/_deps/" 
-"*/*/_deps/" 
-"*/*/*/_deps/" 
-"*/*/*/*/_deps/" 
+# All build directories at any depth
+build/
+**/build/
+
+# All dependency directories
+_deps/
+**/_deps/
+
+# Vendor code
+**/googlebenchmark-src/
+**/googletest-src/

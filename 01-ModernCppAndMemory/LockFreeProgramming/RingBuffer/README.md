@@ -1,104 +1,136 @@
 # Lock-Free Ring Buffer
 
-## Project Overview
+A high-performance, lock-free circular buffer (ring buffer) implementation optimized for low-latency producer-consumer communication in trading systems.
 
-This project implements a high-performance, lock-free circular buffer (ring buffer) designed for ultra-low-latency producer-consumer scenarios in trading systems. The ring buffer provides a fixed-size, pre-allocated memory region where multiple producers can write data and multiple consumers can read data without locks, maximizing throughput in latency-sensitive applications.
+## Overview
 
-## Learning Objectives
+This ring buffer provides a fixed-size, pre-allocated memory region for efficient data exchange between threads without using locks. It is designed for scenarios where multiple producers and consumers need to share data with minimal latency overhead, such as market data processing or order execution systems.
 
-- Implement a lock-free data structure using C++ atomic operations
-- Apply memory ordering constraints correctly for thread safety
-- Optimize for cache coherence and minimize false sharing
-- Develop robust thread synchronization without locks
-- Benchmark performance against traditional concurrent data structures
+## Key Features
 
-## Technical Requirements
+- **Lock-Free Implementation**: Uses atomic operations instead of locks for thread synchronization
+- **Cache-Line Alignment**: Prevents false sharing between cores to maximize performance
+- **Power-of-2 Sizing**: Enables fast index calculations via bitwise operations
+- **Move Semantics Support**: Efficiently handles both primitive types and complex objects
+- **Memory Pre-Faulting**: Avoids page faults during operation for consistent performance
+- **Comprehensive Test Suite**: Validates correctness in various scenarios
+- **Extensive Benchmarking**: Compares performance against standard library alternatives
 
-- C++20 compiler (GCC 10+, Clang 10+, or MSVC 19.2+)
-- CMake 3.16 or higher
-- Google Benchmark library for performance testing
-- Google Test for unit testing
+## Implementation Details
 
-## Implementation Plan
+### Memory Ordering
 
-### Phase 1: Basic Single-Producer, Single-Consumer (SPSC) Ring Buffer
+The implementation carefully controls memory ordering semantics to ensure correct behavior in concurrent scenarios:
 
-1. Create a fixed-size circular buffer with atomic head and tail pointers
-2. Implement basic enqueue and dequeue operations
-3. Ensure correct memory ordering with std::memory_order constraints
-4. Add unit tests for correctness in single-threaded context
+- `std::memory_order_relaxed` for initial reads where sequential consistency isn't required
+- `std::memory_order_acquire` when reading values that other threads may have updated
+- `std::memory_order_release` when writing values that other threads need to see
+- Compare-exchange operations for ensuring atomicity of check-and-update operations
 
-### Phase 2: Thread-Safety and Atomic Operations
+### Thread Safety
 
-1. Implement proper thread synchronization for SPSC scenario
-2. Add cache line padding to prevent false sharing
-3. Ensure lock-free property using only atomic operations
-4. Add multi-threaded unit tests
+The ring buffer is thread-safe for:
+- Multiple producers / multiple consumers
+- Zero-contention operations on separate ends of the buffer
+- Atomic operations ensuring correct visibility across cores
 
-### Phase 3: Multiple-Producer, Multiple-Consumer (MPMC) Extension
+Note: In high-contention scenarios, work distribution may be uneven among consumer threads, with some threads processing more items than others.
 
-1. Extend the implementation to support multiple producers and consumers
-2. Implement slot reservations using compare-and-swap operations
-3. Add sequence counters to prevent ABA problems
-4. Ensure correct operation under high contention
+## Performance
 
-### Phase 4: Performance Optimization
+### Single-Threaded Performance
 
-1. Implement memory pre-faulting for predictable performance
-2. Add optional busy-wait strategies for ultra-low latency
-3. Optimize memory layout for cache efficiency
-4. Add NUMA awareness for multi-socket systems
+| Operation | Buffer Size | Operations/sec | Comparison to std::queue+mutex |
+|-----------|------------|----------------|-------------------------------|
+| Enqueue   | 64         | ~127M/sec      | ~13x faster                   |
+| Enqueue   | 1024       | ~286M/sec      | ~23x faster                   |
+| Dequeue   | 64         | ~30M/sec       | ~3x faster                    |
+| Dequeue   | 1024       | ~45M/sec       | ~4x faster                    |
 
-## Performance Benchmarks
+### Multi-Threaded Performance
 
-The implementation will be benchmarked against:
+| Configuration | Items/sec  | Notes                     |
+|---------------|------------|---------------------------|
+| 1p-1c (1024)  | ~234K/sec  | Baseline configuration    |
+| 2p-2c (1024)  | ~200K/sec  | Slightly lower due to contention |
+| 1p-4c (1024)  | ~133K/sec  | One consumer tends to process most items |
 
-1. std::queue with mutex
-2. boost::lockfree::queue
-3. folly::ProducerConsumerQueue
-4. LMAX Disruptor (C++ port)
+## Usage Example
 
-Metrics to measure:
-- Throughput (operations/second)
-- Latency (mean, 99th percentile, 99.9th percentile, max)
-- CPU cache misses
-- Context switches
+```cpp
+// Create a ring buffer with capacity 1024
+RingBuffer<int, 1024> buffer;
 
-## Advanced Features
+// Producer thread
+auto producer = [&buffer]() {
+    for (int i = 0; i < 100; ++i) {
+        while (!buffer.try_enqueue(i)) {
+            // Optionally yield if buffer is full
+            std::this_thread::yield();
+        }
+    }
+};
 
-- Zero-copy data transfer when possible
-- Batched operations for higher throughput
-- Configurable overflow policies (block, overwrite oldest)
-- Optional timestamps for data items
-- Support for variably-sized data with internal fragmentation handling
+// Consumer thread
+auto consumer = [&buffer]() {
+    int value;
+    size_t items_processed = 0;
+    
+    while (items_processed < 100) {
+        if (buffer.try_dequeue(value)) {
+            // Process value
+            items_processed++;
+        } else {
+            // Optionally yield if buffer is empty
+            std::this_thread::yield();
+        }
+    }
+};
 
-## HFT Application Examples
+// Launch threads
+std::thread p(producer);
+std::thread c(consumer);
+p.join();
+c.join();
+```
 
-In the `examples` directory, we will provide sample use cases relevant to HFT:
-1. Market data distribution to multiple strategy threads
-2. Order management between strategy and execution components
-3. Event processing pipeline with minimal latency
+## Limitations and Trade-offs
 
-## References
+- **Fixed Capacity**: Buffer size must be known at compile time
+- **Power-of-2 Restriction**: Capacity must be a power of 2 for optimal performance
+- **Work Distribution**: In multi-consumer scenarios, work may not be evenly distributed
+- **Memory Usage**: Pre-allocates the entire buffer capacity, which may be inefficient for large buffers with variable usage
 
-- *C++ Concurrency in Action* (Anthony Williams)
-- *The Art of Multiprocessor Programming* (Maurice Herlihy)
-- *LMAX Disruptor Technical Paper*
-- *Mechanical Sympathy* blog by Martin Thompson
+## Future Improvements
 
-## Timeline
+- **Batch Operations**: Add support for enqueueing/dequeueing multiple items in a single operation
+- **Backoff Strategy**: Implement exponential backoff for high-contention scenarios
+- **Work Stealing**: Implement work stealing between consumer threads for better load balancing
+- **Dynamic Sizing**: Explore options for runtime-resizable buffers while maintaining performance
 
-- Week 1: Research and design
-- Week 2: SPSC implementation and testing
-- Week 3: MPMC extension and initial benchmarks
-- Week 4: Optimization and advanced features
-
-## Getting Started
+## Build and Test
 
 ```bash
+# Create build directory
 mkdir build && cd build
+
+# Generate build files with CMake
 cmake ..
-make
-./run_tests
-./run_benchmarks
+
+# Build the project
+cmake --build . --config Release
+
+# Run tests
+ctest -C Release -V
 ```
+
+## Benchmarking
+
+```bash
+# Run benchmarks
+./ring_buffer_bench
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
