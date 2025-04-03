@@ -9,3 +9,7 @@ _deps/
 # Vendor code
 **/googlebenchmark-src/
 **/googletest-src/
+
+# VScode
+.vscode/
+**/.vscode/
