@@ -74,7 +74,7 @@ endif()
 # Enable testing
 enable_testing()
 add_test(NAME RingBufferTest COMMAND ring_buffer_test)  # setup_test
-#add_test(NAME RingBufferBenchmark COMMAND ring_buffer_bench)    # bench_test
+add_test(NAME RingBufferBenchmark COMMAND ring_buffer_bench)    # bench_test
 
 # Install targets
 install(TARGETS ring_buffer_demo ring_buffer_test ring_buffer_bench

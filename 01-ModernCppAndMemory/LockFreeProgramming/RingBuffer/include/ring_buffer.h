@@ -160,7 +160,7 @@ public:
         // Get the item from the buffer
         result = std::move(buffer_[tail & mask_]);
 
-        // Try to atomically update the tail pointer - just once, no spinning
+        // Try to atomically update the tail pointer
         if (tail_.data.compare_exchange_strong(tail, tail + 1, 
                 std::memory_order_release, 
                 std::memory_order_relaxed)) {
@@ -191,7 +191,7 @@ public:
         // Get the item from the buffer
         T result = std::move(buffer_[tail & mask_]);
         
-        // Try to atomically update the tail pointer - just once
+        // Try to atomically update the tail pointer
         if (tail_.data.compare_exchange_strong(tail, tail + 1, 
                 std::memory_order_release, 
                 std::memory_order_relaxed)) {

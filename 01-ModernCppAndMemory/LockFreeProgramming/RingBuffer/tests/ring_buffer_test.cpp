@@ -189,90 +189,6 @@ TEST(RingBufferTest, MoveOnlyType) {
     EXPECT_EQ(value.getValue(), 43);
 }
 
-/*
-// Multi-threaded tests
-TEST(RingBufferTest, MultiThreaded) {
-    // Lighter Test
-    constexpr size_t CAPACITY = 1024;
-    constexpr size_t NUM_ITEMS = 100;
-    constexpr size_t NUM_PRODUCERS = 2;
-    constexpr size_t NUM_CONSUMERS = 2;
-
-    // Heavier Test
-    constexpr size_t CAPACITY = 128;
-    constexpr size_t NUM_ITEMS = 10000;
-    constexpr size_t NUM_PRODUCERS = 4;
-    constexpr size_t NUM_CONSUMERS = 4;
-
-    RingBuffer<int, CAPACITY> buffer;
-    std::atomic<size_t> total_consumed(0);
-    std::atomic<bool> done(false);
-    
-    // Producer function
-    auto producer_func = [&](int producer_id) {
-        for (size_t i = 0; i < NUM_ITEMS; ++i) {
-            int item = static_cast<int>(producer_id * NUM_ITEMS + i);
-            while (!buffer.try_enqueue(item)) {
-                std::this_thread::yield();
-            }
-        }
-    };
-  
-    // Consumer function
-    auto consumer_func = [&]() {
-        while (total_consumed.load() < NUM_ITEMS * NUM_PRODUCERS && !done.load()) {
-            auto result = buffer.try_dequeue();
-            if (result.has_value()) {
-                total_consumed.fetch_add(1, std::memory_order_relaxed);
-            } else {
-                std::this_thread::yield();
-            }
-        }
-    };
-    
-    
-    // Create and start producer threads
-    std::vector<std::thread> producers;
-    for (size_t i = 0; i < NUM_PRODUCERS; ++i) {
-        producers.emplace_back(producer_func, i);
-    }
-    
-    // Create and start consumer threads
-    std::vector<std::thread> consumers;
-    for (size_t i = 0; i < NUM_CONSUMERS; ++i) {
-        consumers.emplace_back(consumer_func);
-    }
-    
-    // Join producer threads
-    for (auto& t : producers) {
-        t.join();
-    }
-    
-    // Wait for all items to be consumed or timeout
-    auto start = std::chrono::steady_clock::now();
-    while (total_consumed.load() < NUM_ITEMS * NUM_PRODUCERS) {
-        auto now = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
-        if (elapsed > 5) {  // 15 second timeout
-            done.store(true);
-            break;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-    
-    // Signal consumers to finish and join them
-    done.store(true);
-    for (auto& t : consumers) {
-        t.join();
-    }
-    
-    // Verify all items were consumed
-    EXPECT_EQ(total_consumed.load(), NUM_ITEMS * NUM_PRODUCERS);
-    EXPECT_TRUE(buffer.empty());
-}
-*/
-
-
 void set_thread_affinity(std::thread& t, unsigned core_id) {
     #ifdef _WIN32
         SetThreadAffinityMask(t.native_handle(), (1ULL << core_id));
@@ -335,21 +251,21 @@ TEST(RingBufferTest, MultiThreaded) {
         }
 
         // Debug logging
-        std::cout << "Consumer finished, saw " << items_seen.size() << " items\n";
+        //std::cout << "Consumer finished, saw " << items_seen.size() << " items\n";
     };
 
     // Create producer threads
     std::vector<std::thread> producers;
     for (size_t i = 0; i < NUM_PRODUCERS; ++i) {
         producers.emplace_back(producer_func);
-        set_thread_affinity(producers.back(), i % 8); // No impact setting affinity
+        set_thread_affinity(producers.back(), i % 8); // Slight impact after setting affinity
     }
 
     // Create consumer threads
     std::vector<std::thread> consumers;
     for (size_t i = 0; i < NUM_CONSUMERS; ++i) {
         consumers.emplace_back(consumer_func);
-        set_thread_affinity(consumers.back(), (i + NUM_PRODUCERS) % 8);   // No impact setting affinity
+        set_thread_affinity(consumers.back(), (i + NUM_PRODUCERS) % 8);   // Slight impact after setting affinity
     }
 
     // Wait for all threads to complete

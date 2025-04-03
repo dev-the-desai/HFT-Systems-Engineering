@@ -1,0 +1,85 @@
+Start testing: Apr 02 23:28 Eastern Daylight Time
+----------------------------------------------------------
+1/2 Testing: RingBufferTest
+1/2 Test: RingBufferTest
+Command: "C:/HFT-Systems-Engineering/01-ModernCppAndMemory/LockFreeProgramming/RingBuffer/build/Release/ring_buffer_test.exe"
+Directory: C:/HFT-Systems-Engineering/01-ModernCppAndMemory/LockFreeProgramming/RingBuffer/build
+"RingBufferTest" start time: Apr 02 23:28 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from RingBufferTest
+[ RUN      ] RingBufferTest.BasicOperations
+[       OK ] RingBufferTest.BasicOperations (0 ms)
+[ RUN      ] RingBufferTest.FillingToCapacity
+[       OK ] RingBufferTest.FillingToCapacity (0 ms)
+[ RUN      ] RingBufferTest.Wraparound
+[       OK ] RingBufferTest.Wraparound (0 ms)
+[ RUN      ] RingBufferTest.ComplexDataType
+[       OK ] RingBufferTest.ComplexDataType (0 ms)
+[ RUN      ] RingBufferTest.MoveOnlyType
+[       OK ] RingBufferTest.MoveOnlyType (0 ms)
+[ RUN      ] RingBufferTest.MultiThreaded
+[       OK ] RingBufferTest.MultiThreaded (1 ms)
+[----------] 6 tests from RingBufferTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (1 ms total)
+[  PASSED  ] 6 tests.
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"RingBufferTest" end time: Apr 02 23:28 Eastern Daylight Time
+"RingBufferTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/2 Testing: RingBufferBenchmark
+2/2 Test: RingBufferBenchmark
+Command: "C:/HFT-Systems-Engineering/01-ModernCppAndMemory/LockFreeProgramming/RingBuffer/build/Release/ring_buffer_bench.exe"
+Directory: C:/HFT-Systems-Engineering/01-ModernCppAndMemory/LockFreeProgramming/RingBuffer/build
+"RingBufferBenchmark" start time: Apr 02 23:28 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+2025-04-02T23:28:06-04:00
+Running C:/HFT-Systems-Engineering/01-ModernCppAndMemory/LockFreeProgramming/RingBuffer/build/Release/ring_buffer_bench.exe
+Run on (32 X 2447.38 MHz CPU s)
+CPU Caches:
+  L1 Data 48 KiB (x16)
+  L1 Instruction 32 KiB (x16)
+  L2 Unified 2048 KiB (x16)
+  L3 Unified 36864 KiB (x1)
+----------------------------------------------------------------------------------------
+Benchmark                              Time             CPU   Iterations UserCounters...
+----------------------------------------------------------------------------------------
+BM_SingleThreadedEnqueue/64          743 ns          636 ns      5600000 items_per_second=100.604M/s
+BM_SingleThreadedEnqueue/128        1265 ns          907 ns      1120000 items_per_second=141.154M/s
+BM_SingleThreadedEnqueue/256        1760 ns         1413 ns       983842 items_per_second=181.115M/s
+BM_SingleThreadedEnqueue/512        2682 ns         2218 ns       373333 items_per_second=230.818M/s
+BM_SingleThreadedEnqueue/1024       4510 ns         4897 ns       172308 items_per_second=209.118M/s
+BM_SingleThreadedDequeue/64         2339 ns         2490 ns       320000 items_per_second=25.7004M/s
+BM_SingleThreadedDequeue/128        3789 ns         3809 ns       172308 items_per_second=33.6083M/s
+BM_SingleThreadedDequeue/256        6708 ns         7324 ns        89600 items_per_second=34.9525M/s
+BM_SingleThreadedDequeue/512       12613 ns        12277 ns        56000 items_per_second=41.7047M/s
+BM_SingleThreadedDequeue/1024      24339 ns        24588 ns        29867 items_per_second=41.646M/s
+BM_StdQueueWithMutex/64            12384 ns        12939 ns        64000 items_per_second=9.89223M/s
+BM_StdQueueWithMutex/128           24649 ns        25495 ns        26353 items_per_second=10.0411M/s
+BM_StdQueueWithMutex/256           47168 ns        47085 ns        14933 items_per_second=10.8739M/s
+BM_StdQueueWithMutex/512           92012 ns        96257 ns         7467 items_per_second=10.6382M/s
+BM_StdQueueWithMutex/1024         184137 ns       187976 ns         4073 items_per_second=10.895M/s
+BM_MultiThreaded<1024>/1/1        882162 ns       608129 ns         1593 items_per_second=164.439k/s 1p-1c
+BM_MultiThreaded<1024>/2/2       1360998 ns       864955 ns         1120 items_per_second=115.613k/s 2p-2c
+BM_MultiThreaded<64>/2/2         1345722 ns       837054 ns         1120 items_per_second=119.467k/s 2p-2c
+BM_MultiThreaded<256>/2/2        1302849 ns       725446 ns         1120 items_per_second=137.846k/s 2p-2c
+BM_MultiThreaded<1024>/2/2       1317973 ns       711178 ns          747 items_per_second=140.612k/s 2p-2c
+BM_MultiThreaded<4096>/2/2       1204244 ns       645229 ns          896 items_per_second=154.984k/s 2p-2c
+<end of output>
+Test time =  70.17 sec
+----------------------------------------------------------
+Test Passed.
+"RingBufferBenchmark" end time: Apr 02 23:29 Eastern Daylight Time
+"RingBufferBenchmark" time elapsed: 00:01:10
+----------------------------------------------------------
+
+End testing: Apr 02 23:29 Eastern Daylight Time
