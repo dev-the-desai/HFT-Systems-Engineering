@@ -42,10 +42,10 @@ Note: In high-contention scenarios, work distribution may be uneven among consum
 
 | Operation | Buffer Size | Operations/sec | Comparison to std::queue+mutex |
 |-----------|------------|----------------|-------------------------------|
-| Enqueue   | 64         | ~127M/sec      | ~13x faster                   |
-| Enqueue   | 1024       | ~286M/sec      | ~23x faster                   |
-| Dequeue   | 64         | ~30M/sec       | ~3x faster                    |
-| Dequeue   | 1024       | ~45M/sec       | ~4x faster                    |
+| Enqueue   | 64         | ~111/sec       | ~11x faster                   |
+| Enqueue   | 1024       | ~293M/sec      | ~26x faster                   |
+| Dequeue   | 64         | ~28M/sec       | ~3x faster                    |
+| Dequeue   | 1024       | ~40M/sec       | ~4x faster                    |
 
 ### Multi-Threaded Performance
 
@@ -54,6 +54,15 @@ Note: In high-contention scenarios, work distribution may be uneven among consum
 | 1p-1c (1024)  | ~234K/sec  | Baseline configuration    |
 | 2p-2c (1024)  | ~200K/sec  | Slightly lower due to contention |
 | 1p-4c (1024)  | ~133K/sec  | One consumer tends to process most items |
+
+| Configuration    |  Items/sec     | Notes             |
+|------------------|----------------|-------------------|
+| 1p-1c (1024)     |  179.2K/s      | 1 producer, 1 consumer |
+| 2p-2c (1024)     |  147.036K/s    | 2 producers, 2 consumers |
+| 1p-4c (1024)     |  130.612K/s    | 1 producer, 4 consumers |
+| 2p-2c (64)       |  168.659K/s    | 2 producers, 2 consumers, small buffer |
+| 2p-2c (256)      |  128K/s        | 2 producers, 2 consumers, medium buffer |
+| 2p-2c (4096)     |  120.755K/s    | 2 producers, 2 consumers, large buffer |
 
 ## Usage Example
 
