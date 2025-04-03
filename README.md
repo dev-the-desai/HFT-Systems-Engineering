@@ -1,4 +1,4 @@
-# HFT Systems Engineering: A Skills Development Path
+# HFT Systems Engineering
 
 This repository documents my journey in developing the specialized skills necessary for high-frequency trading systems engineering. It contains implementations of various data structures, algorithms, and systems optimized for ultra-low latency and high throughput trading environments.
 
@@ -153,6 +153,7 @@ The recommended starting point is with Module 1: Modern C++ and Memory Managemen
 The global Resources directory contains broader learning materials:
 
 ### Books
+- "Effective Modern C++" by "Scott Meyers"
 - "High-Performance Computing" by Kevin Dowd and Charles Severance
 - "The Art of Multiprocessor Programming" by Maurice Herlihy and Nir Shavit
 - "C++ Concurrency in Action" by Anthony Williams
