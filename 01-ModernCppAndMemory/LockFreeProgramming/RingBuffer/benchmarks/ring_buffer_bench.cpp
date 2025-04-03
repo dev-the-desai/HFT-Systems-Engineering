@@ -58,10 +58,10 @@ static void BM_MultiThreaded(benchmark::State& state) {
     // Number of items to process per iteration
 
     // For quick verification during development
-    constexpr size_t num_items = 100;  // 10K
+    constexpr size_t num_items = 1000;  // 1K
 
     // For thorough validation (run separately)
-    // constexpr size_t num_items = 1000000;  // 1M
+    //constexpr size_t num_items = 100000;  // 1M
     
     // Number of producer and consumer threads
     const size_t num_producers = state.range(0);
