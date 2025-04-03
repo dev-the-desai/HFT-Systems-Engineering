@@ -4,14 +4,14 @@
 #include <vector>
 #include <atomic>
 
-
+/*
 #include <thread>
 #ifdef _WIN32
 #include <windows.h>
 #else
 #include <pthread.h>
 #endif
-
+*/
 
 // Basic functionality tests
 TEST(RingBufferTest, BasicOperations) {
@@ -189,6 +189,7 @@ TEST(RingBufferTest, MoveOnlyType) {
     EXPECT_EQ(value.getValue(), 43);
 }
 
+/*
 void set_thread_affinity(std::thread& t, unsigned core_id) {
     #ifdef _WIN32
         SetThreadAffinityMask(t.native_handle(), (1ULL << core_id));
@@ -199,13 +200,13 @@ void set_thread_affinity(std::thread& t, unsigned core_id) {
         pthread_setaffinity_np(t.native_handle(), sizeof(cpu_set_t), &cpuset);
     #endif
 }
-
+*/
 
 TEST(RingBufferTest, MultiThreaded) {
     // Test parameters
     constexpr size_t NUM_PRODUCERS = 2;
     constexpr size_t NUM_CONSUMERS = 2;
-    constexpr size_t NUM_ITEMS = 100;
+    constexpr size_t NUM_ITEMS = 1000;
     constexpr size_t BUFFER_SIZE = 1024;
 
     // Create the ring buffer
@@ -258,14 +259,14 @@ TEST(RingBufferTest, MultiThreaded) {
     std::vector<std::thread> producers;
     for (size_t i = 0; i < NUM_PRODUCERS; ++i) {
         producers.emplace_back(producer_func);
-        set_thread_affinity(producers.back(), i % 8); // Slight impact after setting affinity
+        //set_thread_affinity(producers.back(), i % 8); // Slight impact after setting affinity
     }
 
     // Create consumer threads
     std::vector<std::thread> consumers;
     for (size_t i = 0; i < NUM_CONSUMERS; ++i) {
         consumers.emplace_back(consumer_func);
-        set_thread_affinity(consumers.back(), (i + NUM_PRODUCERS) % 8);   // Slight impact after setting affinity
+        //set_thread_affinity(consumers.back(), (i + NUM_PRODUCERS) % 8);   // Slight impact after setting affinity
     }
 
     // Wait for all threads to complete

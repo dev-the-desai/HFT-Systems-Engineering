@@ -208,13 +208,13 @@ BENCHMARK(BM_StdQueueWithMutex)->RangeMultiplier(2)->Range(64, 1024);
 BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({1, 1});  // 1 producer, 1 consumer
 BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({2, 2});  // 2 producers, 2 consumers
 //BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({4, 4});  // 4 producers, 4 consumers
-//BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({1, 4});  // 1 producer, 4 consumers
+BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({1, 4});  // 1 producer, 4 consumers
 //BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({4, 1});  // 4 producers, 1 consumer
 
 // Different buffer sizes
 BENCHMARK_TEMPLATE(BM_MultiThreaded, 64)->Args({2, 2});    // Small buffer
 BENCHMARK_TEMPLATE(BM_MultiThreaded, 256)->Args({2, 2});   // Medium buffer
-BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({2, 2});  // Large buffer
+//BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({2, 2});  // Large buffer
 BENCHMARK_TEMPLATE(BM_MultiThreaded, 4096)->Args({2, 2});  // Very large buffer
 
 BENCHMARK_MAIN();
