@@ -1,4 +1,4 @@
-#include "../include/ring_buffer.h"
+#include "../include/mpmc_queue.h"
 #include <benchmark/benchmark.h>
 #include <thread>
 #include <vector>
@@ -8,68 +8,63 @@
 
 // Single-threaded enqueue benchmark
 static void BM_SingleThreadedEnqueue(benchmark::State& state) {
-    // Create a ring buffer with the specified size
-    const size_t buffer_size = state.range(0);
-    RingBuffer<int, 1024> buffer; // Fixed size for benchmark
+    // Create a queue with the specified size
+    const size_t queue_size = state.range(0);
+    MPMCQueue<int, 1024> queue; // Fixed size for benchmark
     
     for (auto _ : state) {
         state.PauseTiming();
-        // Clear the buffer between iterations
+        // Clear the queue between iterations
         int value;
-        while (buffer.try_dequeue(value)) {}
+        while (queue.dequeue(value)) {}
         state.ResumeTiming();
         
         // Benchmark enqueue operations
-        for (size_t i = 0; i < buffer_size; ++i) {
-            buffer.try_enqueue(static_cast<int>(i));
+        for (size_t i = 0; i < queue_size; ++i) {
+            queue.enqueue(static_cast<int>(i));
         }
     }
     
-    state.SetItemsProcessed(state.iterations() * buffer_size);
+    state.SetItemsProcessed(state.iterations() * queue_size);
 }
 
 // Single-threaded dequeue benchmark
 static void BM_SingleThreadedDequeue(benchmark::State& state) {
-    // Create a ring buffer with the specified size
-    const size_t buffer_size = state.range(0);
-    RingBuffer<int, 1024> buffer; // Fixed size for benchmark
+    // Create a queue with the specified size
+    const size_t queue_size = state.range(0);
+    MPMCQueue<int, 1024> queue; // Fixed size for benchmark
     
     for (auto _ : state) {
         state.PauseTiming();
-        // Fill the buffer before testing dequeue
-        for (size_t i = 0; i < buffer_size; ++i) {
-            buffer.try_enqueue(static_cast<int>(i));
+        // Fill the queue before testing dequeue
+        for (size_t i = 0; i < queue_size; ++i) {
+            queue.enqueue(static_cast<int>(i));
         }
         state.ResumeTiming();
         
         // Benchmark dequeue operations
         int value;
-        for (size_t i = 0; i < buffer_size; ++i) {
-            buffer.try_dequeue(value);
+        for (size_t i = 0; i < queue_size; ++i) {
+            queue.dequeue(value);
         }
     }
     
-    state.SetItemsProcessed(state.iterations() * buffer_size);
+    state.SetItemsProcessed(state.iterations() * queue_size);
 }
 
 // Multi-threaded producer-consumer benchmark
-template<size_t BufferSize>
+template<size_t QueueSize>
 static void BM_MultiThreaded(benchmark::State& state) {
     // Number of items to process per iteration
-
-    // For quick verification during development
-    constexpr size_t num_items = 1000;  // 1K
-
-    // For thorough validation (run separately)
-    //constexpr size_t num_items = 100000;  // 1M
+    constexpr size_t num_items = 1000;  // 1K for quick benchmarks
     
     // Number of producer and consumer threads
     const size_t num_producers = state.range(0);
     const size_t num_consumers = state.range(1);
     
     for (auto _ : state) {
-        // Create a new buffer for each iteration
-        RingBuffer<int, BufferSize> buffer;
+        // Create a new queue for each iteration
+        MPMCQueue<int, QueueSize> queue;
         
         // Synchronization variables
         std::atomic<size_t> items_produced(0);
@@ -89,7 +84,7 @@ static void BM_MultiThreaded(benchmark::State& state) {
             const size_t end_item = start_item + items_per_producer;
             
             for (size_t i = start_item; i < end_item; ++i) {
-                while (!buffer.try_enqueue(static_cast<int>(i))) {
+                while (!queue.enqueue(static_cast<int>(i))) {
                     std::this_thread::yield();
                     // Check if we should terminate early
                     if (done.load(std::memory_order_acquire)) return;
@@ -107,7 +102,7 @@ static void BM_MultiThreaded(benchmark::State& state) {
             
             int value;
             while (items_consumed.load(std::memory_order_relaxed) < num_items) {
-                if (buffer.try_dequeue(value)) {
+                if (queue.dequeue(value)) {
                     items_consumed.fetch_add(1, std::memory_order_relaxed);
                 } else {
                     std::this_thread::yield();
@@ -167,7 +162,7 @@ static void BM_MultiThreaded(benchmark::State& state) {
 
 // Comparison with std::queue + mutex
 static void BM_StdQueueWithMutex(benchmark::State& state) {
-    const size_t buffer_size = state.range(0);
+    const size_t queue_size = state.range(0);
     std::queue<int> queue;
     std::mutex mutex;
     
@@ -182,13 +177,13 @@ static void BM_StdQueueWithMutex(benchmark::State& state) {
         state.ResumeTiming();
         
         // Benchmark enqueue operations
-        for (size_t i = 0; i < buffer_size; ++i) {
+        for (size_t i = 0; i < queue_size; ++i) {
             std::lock_guard<std::mutex> lock(mutex);
             queue.push(static_cast<int>(i));
         }
         
         // Benchmark dequeue operations
-        for (size_t i = 0; i < buffer_size; ++i) {
+        for (size_t i = 0; i < queue_size; ++i) {
             std::lock_guard<std::mutex> lock(mutex);
             if (!queue.empty()) {
                 queue.pop();
@@ -196,10 +191,10 @@ static void BM_StdQueueWithMutex(benchmark::State& state) {
         }
     }
     
-    state.SetItemsProcessed(state.iterations() * buffer_size * 2); // Enqueue + dequeue
+    state.SetItemsProcessed(state.iterations() * queue_size * 2); // Enqueue + dequeue
 }
 
-// Register the benchmarks (Uncomment as per usage)
+// Register the benchmarks
 BENCHMARK(BM_SingleThreadedEnqueue)->RangeMultiplier(2)->Range(64, 1024);
 BENCHMARK(BM_SingleThreadedDequeue)->RangeMultiplier(2)->Range(64, 1024);
 BENCHMARK(BM_StdQueueWithMutex)->RangeMultiplier(2)->Range(64, 1024);
@@ -207,14 +202,13 @@ BENCHMARK(BM_StdQueueWithMutex)->RangeMultiplier(2)->Range(64, 1024);
 // Multi-threaded benchmarks with different producer/consumer combinations
 BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({1, 1});  // 1 producer, 1 consumer
 BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({2, 2});  // 2 producers, 2 consumers
-//BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({4, 4});  // 4 producers, 4 consumers
+BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({4, 4});  // 4 producers, 4 consumers
 BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({1, 4});  // 1 producer, 4 consumers
-//BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({4, 1});  // 4 producers, 1 consumer
+BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({4, 1});  // 4 producers, 1 consumer
 
-// Different buffer sizes
-BENCHMARK_TEMPLATE(BM_MultiThreaded, 64)->Args({2, 2});    // Small buffer
-BENCHMARK_TEMPLATE(BM_MultiThreaded, 256)->Args({2, 2});   // Medium buffer
-//BENCHMARK_TEMPLATE(BM_MultiThreaded, 1024)->Args({2, 2});  // Large buffer
-BENCHMARK_TEMPLATE(BM_MultiThreaded, 4096)->Args({2, 2});  // Very large buffer
+// Different queue sizes
+BENCHMARK_TEMPLATE(BM_MultiThreaded, 64)->Args({2, 2});    // Small queue
+BENCHMARK_TEMPLATE(BM_MultiThreaded, 256)->Args({2, 2});   // Medium queue
+BENCHMARK_TEMPLATE(BM_MultiThreaded, 4096)->Args({2, 2});  // Very large queue
 
 BENCHMARK_MAIN();

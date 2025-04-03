@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(RingBuffer VERSION 0.1.0 LANGUAGES CXX)
+project(MPMC_Queue VERSION 0.1.0 LANGUAGES CXX)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -22,8 +22,8 @@ else()
 endif()
 
 # Add the executable
-add_executable(ring_buffer_demo src/main.cpp)
-target_include_directories(ring_buffer_demo PRIVATE include)
+add_executable(mpmc_queue_demo src/main.cpp)
+target_include_directories(mpmc_queue_demo PRIVATE include)
 
 # Find Google Test
 find_package(GTest QUIET)
@@ -38,9 +38,9 @@ if(NOT GTest_FOUND)
 endif()
 
 # Add the test executable
-add_executable(ring_buffer_test tests/ring_buffer_test.cpp)
-target_include_directories(ring_buffer_test PRIVATE include)
-target_link_libraries(ring_buffer_test PRIVATE GTest::gtest GTest::gtest_main)
+add_executable(mpmc_queue_test tests/mpmc_queue_test.cpp)
+target_include_directories(mpmc_queue_test PRIVATE include)
+target_link_libraries(mpmc_queue_test PRIVATE GTest::gtest GTest::gtest_main)
 
 # Find Google Benchmark
 find_package(benchmark QUIET)
@@ -56,29 +56,29 @@ if(NOT benchmark_FOUND)
 endif()
 
 # Add the benchmark executable
-add_executable(ring_buffer_bench benchmarks/ring_buffer_bench.cpp)
-target_include_directories(ring_buffer_bench PRIVATE include)
-target_link_libraries(ring_buffer_bench PRIVATE benchmark::benchmark)
+add_executable(mpmc_queue_bench benchmarks/mpmc_queue_bench.cpp)
+target_include_directories(mpmc_queue_bench PRIVATE include)
+target_link_libraries(mpmc_queue_bench PRIVATE benchmark::benchmark)
 
 # Add pthread on Unix-like systems
 if(UNIX AND NOT APPLE)
     find_package(Threads REQUIRED)
-    target_link_libraries(ring_buffer_demo PRIVATE Threads::Threads)
-    target_link_libraries(ring_buffer_test PRIVATE Threads::Threads)
-    target_link_libraries(ring_buffer_bench PRIVATE Threads::Threads)
+    target_link_libraries(mpmc_queue_demo PRIVATE Threads::Threads)
+    target_link_libraries(mpmc_queue_test PRIVATE Threads::Threads)
+    target_link_libraries(mpmc_queue_bench PRIVATE Threads::Threads)
 endif()
 
 # Enable testing
 enable_testing()
-add_test(NAME RingBufferTest COMMAND ring_buffer_test)  # setup_test
-add_test(NAME RingBufferBenchmark COMMAND ring_buffer_bench)    # bench_test
+add_test(NAME MPMCQueueTest COMMAND mpmc_queue_test)
+add_test(NAME MPMCQueueBenchmark COMMAND mpmc_queue_bench)
 
 # Install targets
-install(TARGETS ring_buffer_demo ring_buffer_test ring_buffer_bench
+install(TARGETS mpmc_queue_demo mpmc_queue_test mpmc_queue_bench
         RUNTIME DESTINATION bin
 )
 
 # Install header files
-install(FILES include/ring_buffer.h
+install(FILES include/mpmc_queue.h
         DESTINATION include
 )

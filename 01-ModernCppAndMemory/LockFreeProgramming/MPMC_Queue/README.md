@@ -1,122 +1,127 @@
-# Lock-Free MPMC Queue
+# MPMC Queue
 
-A high-performance, lock-free Multi-Producer Multi-Consumer (MPMC) queue implementation optimized for high-frequency trading applications.
+A high-performance, lock-free Multiple-Producer Multiple-Consumer queue implementation optimized for High-Frequency Trading systems.
 
 ## Overview
 
-This MPMC queue provides a fixed-size, pre-allocated memory region for efficient concurrent data exchange between multiple producer and consumer threads without locks. Unlike a standard ring buffer, this implementation focuses on ensuring fair work distribution among consumers, making it ideal for parallel processing in market data systems.
+This lock-free MPMC queue implementation provides a bounded buffer that can safely be accessed by multiple threads simultaneously, without using traditional locking mechanisms. The implementation is optimized for low-latency and high-throughput environments, such as High-Frequency Trading applications.
 
-## Key Features
-
-- **Lock-Free Implementation**: Uses atomic operations instead of locks for thread synchronization
-- **Balanced Work Distribution**: Fair allocation of work across multiple consumer threads
-- **Cache-Line Alignment**: Prevents false sharing between cores to maximize performance
-- **Memory Pre-Faulting**: Avoids page faults during operation for consistent performance
-- **Deterministic Behavior**: Predictable performance characteristics under load
-- **ABA Problem Prevention**: Handles the ABA problem using sequence counters
-
-## Design Goals
-
-1. **Fairness**: Evenly distribute work across consumer threads
-2. **Throughput**: Maximize the number of operations per second
-3. **Latency**: Minimize operation latency and reduce tail latencies
-4. **Scalability**: Maintain good performance as thread count increases
+Key features:
+- Fully lock-free design
+- Cache-line aligned counters to prevent false sharing
+- Bounded queue with a fixed capacity (power of 2)
+- Strong memory ordering guarantees
+- Optimized for both throughput and latency
 
 ## Implementation Details
 
-The MPMC queue will be implemented using a combination of:
+The queue design is based on a sequence counter approach. Each slot in the queue has an associated atomic sequence counter that indicates whether the slot is available for producers or consumers. This design eliminates the ABA problem common in lock-free algorithms.
 
-1. **Array-Based Storage**: Fixed-size array for deterministic performance
-2. **Sequence Counters**: To prevent the ABA problem and track slots
-3. **Memory Barriers**: Carefully placed to ensure visibility between threads
-4. **Compare-Exchange Operations**: For atomic updates to queue state
+The implementation uses C++20 atomic operations with carefully selected memory ordering constraints to ensure correctness while minimizing overhead.
 
-## Usage Example
+## API
 
 ```cpp
-// Create an MPMC queue with capacity 1024
+// Create an MPMC queue with a capacity of 1024 elements
 MPMCQueue<int, 1024> queue;
 
-// Producer threads
-auto producer = [&queue](int id) {
-    for (int i = 0; i < 100; ++i) {
-        int value = id * 1000 + i;
-        while (!queue.enqueue(value)) {
-            // Yield if queue is full
-            std::this_thread::yield();
-        }
-    }
-};
+// Enqueue an element
+bool success = queue.enqueue(42);
 
-// Consumer threads
-auto consumer = [&queue](int id) {
-    int value;
-    size_t count = 0;
-    
-    while (count < 200) { // Assuming 2 producers, each producing 100 items
-        if (queue.dequeue(value)) {
-            // Process value
-            count++;
-        } else {
-            // Yield if queue is empty
-            std::this_thread::yield();
-        }
-    }
-};
+// Dequeue an element (reference version)
+int value;
+bool success = queue.dequeue(value);
 
-// Launch threads
-std::vector<std::thread> producers;
-std::vector<std::thread> consumers;
+// Dequeue an element (optional version)
+std::optional<int> result = queue.dequeue();
+if (result) {
+    int value = result.value();
+}
 
-for (int i = 0; i < 2; ++i) producers.emplace_back(producer, i);
-for (int i = 0; i < 2; ++i) consumers.emplace_back(consumer, i);
-
-// Join threads
-for (auto& t : producers) t.join();
-for (auto& t : consumers) t.join();
+// Queue status
+bool isEmpty = queue.empty();
+size_t numElements = queue.size();
+constexpr size_t capacity = queue.capacity();
 ```
 
-## Performance Goals
+## Performance
 
-- **Throughput**: Target at least 50 million operations per second for small messages
-- **Latency**: Target under 100ns per operation at the 99th percentile
-- **Scalability**: Linear scaling up to the number of physical cores
-- **Fairness**: Less than 20% variation in work distribution between consumer threads
+The MPMC queue implementation is designed to provide excellent performance in both single-threaded and multi-threaded scenarios:
 
-## Comparison with Ring Buffer
+- Low-latency enqueue/dequeue operations
+- High throughput under contention
+- Minimal impact on cache coherency through careful alignment
+- Fair scheduling for multiple producers and consumers
 
-The MPMC Queue will build upon lessons learned from the Ring Buffer implementation, with these key improvements:
+Performance can be evaluated using the included benchmark suite, which compares this implementation against traditional mutex-based queues.
 
-1. **Fairness**: Better work distribution among consumer threads
-2. **Contention Management**: Reduced contention under high load
-3. **Cache Efficiency**: Improved cache utilization for better throughput
-4. **Hybrid Architecture Awareness**: Optimizations for P-core/E-core systems
+## Requirements
 
-## Development Roadmap
+- C++20 compatible compiler
+- CMake 3.16 or newer
 
-1. **Implementation**: Core queue implementation with minimal functionality
-2. **Testing**: Comprehensive test suite for correctness validation
-3. **Benchmarking**: Performance analysis under various workloads
-4. **Optimization**: Fine-tuning based on benchmark results
-5. **Documentation**: Detailed documentation of design and implementation
-6. **Integration**: Example usage in a market data processing system
-
-## Build and Test
+## Building
 
 ```bash
-# Create build directory
+# Create a build directory
 mkdir build && cd build
 
-# Generate build files with CMake
+# Configure with CMake
 cmake ..
 
-# Build the project
-cmake --build . --config Release
+# Build
+cmake --build .
 
 # Run tests
-ctest -C Release -V
+ctest
+```
+
+## Example
+
+A simple example demonstrating the MPMC queue in a multi-producer, multi-consumer scenario:
+
+```cpp
+#include "mpmc_queue.h"
+#include <thread>
+#include <vector>
+
+int main() {
+    // Create a queue with capacity for 1024 elements
+    MPMCQueue<int, 1024> queue;
+
+    // Create multiple producer threads
+    std::vector<std::thread> producers;
+    for (int i = 0; i < 4; ++i) {
+        producers.emplace_back([&queue, i]() {
+            for (int j = 0; j < 1000; ++j) {
+                // Enqueue items
+                queue.enqueue(i * 1000 + j);
+            }
+        });
+    }
+
+    // Create multiple consumer threads
+    std::vector<std::thread> consumers;
+    for (int i = 0; i < 4; ++i) {
+        consumers.emplace_back([&queue]() {
+            int value;
+            for (int j = 0; j < 1000; ++j) {
+                // Dequeue items
+                while (!queue.dequeue(value)) {
+                    std::this_thread::yield();
+                }
+            }
+        });
+    }
+
+    // Wait for completion
+    for (auto& t : producers) t.join();
+    for (auto& t : consumers) t.join();
+
+    return 0;
+}
 ```
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This code is provided for educational purposes as part of the High-Frequency Trading Systems Engineering course.

@@ -32,7 +32,6 @@ struct alignas(CACHE_LINE_SIZE) CacheLineAligned {
     }
 };
 
-
 /**
  * @brief A lock-free ring buffer implementation optimized for high-performance trading applications
  * 
@@ -49,19 +48,7 @@ class RingBuffer {
     static_assert((Capacity & (Capacity - 1)) == 0, "Capacity must be a power of 2");
     static_assert(std::is_move_constructible_v<T>, "T must be move constructible");
 
-public:
-    /**
-     * @brief Constructs a new Ring Buffer with the specified capacity
-     */
-    /*
-    RingBuffer() noexcept : head_(0), tail_(0) {
-        // Pre-fault the memory to avoid page faults during operation
-        for (size_t i = 0; i < Capacity; ++i) {
-            new (&buffer_[i]) T();
-        }
-    }
-    */
-    
+public: 
     /**
      * @brief Constructs a new Ring Buffer with the specified capacity
      */
@@ -168,10 +155,6 @@ public:
         }
 
         return false;
-        
-        // Update the tail pointer with a release operation
-        //tail_.data.store(tail + 1, std::memory_order_release);
-        //return true;
     }
 
     /**
@@ -200,10 +183,6 @@ public:
 
         // If compare_exchange fails, return empty result
         return std::nullopt;
-
-        // Update the tail pointer
-        //tail_.data.store(tail + 1, std::memory_order_release);
-        //return std::optional<T>(std::move(result));
     }
 
     /**
