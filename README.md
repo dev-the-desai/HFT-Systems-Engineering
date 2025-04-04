@@ -55,59 +55,6 @@ The learning path is structured in progressive modules, designed as a comprehens
    * Coding challenges for performance-critical roles
    * Industry-specific knowledge
 
-## Repository Structure
-
-```
-High-Performance-Systems-Engineering/
-├── 01-ModernCpp/
-│   ├── AdvancedFeatures/
-│   ├── PerformancePatterns/
-│   └── ...
-├── 02-LockFreeProgramming/
-│   ├── RingBuffer/
-│   ├── MPMC_Queue/
-│   └── ...
-├── 03-MemoryManagement/
-│   ├── CustomAllocator/
-│   ├── PoolAllocator/
-│   └── ...
-├── 04-NetworkOptimization/
-│   ├── KernelBypass/
-│   ├── ZeroCopy/
-│   └── ...
-├── 05-HardwareAcceleration/
-│   ├── FPGA/
-│   ├── CPU-FPGA-Interface/
-│   └── ...
-├── 06-LLVMOptimization/
-│   ├── CustomPasses/
-│   ├── JITCompilation/
-│   └── ...
-├── 07-DomainKnowledge/
-│   ├── MarketStructure/
-│   ├── RealTimeSystems/
-│   └── ...
-├── 08-IntegratedSystems/
-│   ├── EventProcessing/
-│   ├── DataPipelines/
-│   └── ...
-├── 09-PortfolioProjects/
-│   ├── Project1/
-│   ├── Project2/
-│   └── ...
-├── 10-CareerPrep/
-│   ├── SystemDesign/
-│   ├── CodingChallenges/
-│   └── ...
-└── Resources/
-    ├── Books/
-    ├── Papers/
-    ├── Courses/
-    └── References/
-```
-
-Each directory contains implementations, tests, benchmarks, and documentation for specific components relevant to high-performance systems engineering.
-
 ## Core Competencies
 
 The projects in this repository focus on developing these core competencies:
@@ -176,15 +123,6 @@ The global Resources directory contains broader learning materials:
 - CppCon talks on high-performance programming
 - LLVM documentation and optimization guides
 - Intel/AMD architecture optimization guides
-
-## Career Goals
-
-By completing this learning path, I aim to develop the skills necessary for roles such as:
-* High-Performance Systems Engineer
-* Low-Latency Infrastructure Developer
-* Real-Time Systems Architect
-* Performance-Critical Software Engineer
-* Financial Technology Systems Developer
 
 ## License
 
