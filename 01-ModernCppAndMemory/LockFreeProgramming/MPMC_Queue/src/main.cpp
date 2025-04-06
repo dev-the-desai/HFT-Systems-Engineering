@@ -77,7 +77,7 @@ int main() {
     // Create consumer threads
     std::vector<std::thread> consumers;
     for (int c = 0; c < NUM_CONSUMERS; ++c) {
-        consumers.emplace_back([&queue, &consumed, &done]() {
+        consumers.emplace_back([&queue, &consumed, &produced, &done]() {
             while (true) {
                 int value;
                 if (queue.dequeue(value)) {

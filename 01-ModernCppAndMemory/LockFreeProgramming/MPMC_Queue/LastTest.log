@@ -1,0 +1,87 @@
+Start testing: Apr 04 21:27 Eastern Daylight Time
+----------------------------------------------------------
+1/2 Testing: MPMCQueueTest
+1/2 Test: MPMCQueueTest
+Command: "C:/HFT-Systems-Engineering/01-ModernCppAndMemory/LockFreeProgramming/MPMC_Queue/build/Release/mpmc_queue_test.exe"
+Directory: C:/HFT-Systems-Engineering/01-ModernCppAndMemory/LockFreeProgramming/MPMC_Queue/build
+"MPMCQueueTest" start time: Apr 04 21:27 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from MPMCQueueTest
+[ RUN      ] MPMCQueueTest.BasicOperations
+[       OK ] MPMCQueueTest.BasicOperations (0 ms)
+[ RUN      ] MPMCQueueTest.FillingToCapacity
+[       OK ] MPMCQueueTest.FillingToCapacity (0 ms)
+[ RUN      ] MPMCQueueTest.Wraparound
+[       OK ] MPMCQueueTest.Wraparound (0 ms)
+[ RUN      ] MPMCQueueTest.ComplexDataType
+[       OK ] MPMCQueueTest.ComplexDataType (0 ms)
+[ RUN      ] MPMCQueueTest.MoveOnlyType
+[       OK ] MPMCQueueTest.MoveOnlyType (0 ms)
+[ RUN      ] MPMCQueueTest.MultiThreaded
+[       OK ] MPMCQueueTest.MultiThreaded (2 ms)
+[----------] 6 tests from MPMCQueueTest (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (2 ms total)
+[  PASSED  ] 6 tests.
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"MPMCQueueTest" end time: Apr 04 21:27 Eastern Daylight Time
+"MPMCQueueTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/2 Testing: MPMCQueueBenchmark
+2/2 Test: MPMCQueueBenchmark
+Command: "C:/HFT-Systems-Engineering/01-ModernCppAndMemory/LockFreeProgramming/MPMC_Queue/build/Release/mpmc_queue_bench.exe"
+Directory: C:/HFT-Systems-Engineering/01-ModernCppAndMemory/LockFreeProgramming/MPMC_Queue/build
+"MPMCQueueBenchmark" start time: Apr 04 21:27 Eastern Daylight Time
+Output:
+----------------------------------------------------------
+2025-04-04T21:27:19-04:00
+Running C:/HFT-Systems-Engineering/01-ModernCppAndMemory/LockFreeProgramming/MPMC_Queue/build/Release/mpmc_queue_bench.exe
+Run on (32 X 2426.43 MHz CPU s)
+CPU Caches:
+  L1 Data 48 KiB (x16)
+  L1 Instruction 32 KiB (x16)
+  L2 Unified 2048 KiB (x16)
+  L3 Unified 36864 KiB (x1)
+----------------------------------------------------------------------------------------
+Benchmark                              Time             CPU   Iterations UserCounters...
+----------------------------------------------------------------------------------------
+BM_SingleThreadedEnqueue/64          611 ns          656 ns      1000000 items_per_second=97.5238M/s
+BM_SingleThreadedEnqueue/128        3949 ns         3828 ns      1000000 items_per_second=33.4367M/s
+BM_SingleThreadedEnqueue/256        8144 ns         9062 ns       100000 items_per_second=28.2483M/s
+BM_SingleThreadedEnqueue/512       15299 ns        13602 ns        74667 items_per_second=37.6414M/s
+BM_SingleThreadedEnqueue/1024      30490 ns        30692 ns        22400 items_per_second=33.3638M/s
+BM_SingleThreadedDequeue/64         2770 ns         2895 ns       448000 items_per_second=22.1085M/s
+BM_SingleThreadedDequeue/128        4649 ns         4614 ns       165926 items_per_second=27.7401M/s
+BM_SingleThreadedDequeue/256        8332 ns         8692 ns        98869 items_per_second=29.4522M/s
+BM_SingleThreadedDequeue/512       15934 ns        16183 ns        56000 items_per_second=31.6381M/s
+BM_SingleThreadedDequeue/1024      31392 ns        31285 ns        19478 items_per_second=32.731M/s
+BM_StdQueueWithMutex/64            14220 ns        14300 ns        44800 items_per_second=8.95126M/s
+BM_StdQueueWithMutex/128           24495 ns        23019 ns        37333 items_per_second=11.1212M/s
+BM_StdQueueWithMutex/256           47687 ns        49178 ns        14933 items_per_second=10.4112M/s
+BM_StdQueueWithMutex/512           95641 ns        94169 ns         8960 items_per_second=10.8741M/s
+BM_StdQueueWithMutex/1024         204283 ns       199507 ns         3446 items_per_second=10.2653M/s
+BM_MultiThreaded<1024>/1/1        826078 ns       578125 ns         1000 items_per_second=1.72973M/s 1p-1c
+BM_MultiThreaded<1024>/2/2       1300834 ns       585938 ns         1120 items_per_second=1.70667M/s 2p-2c
+BM_MultiThreaded<1024>/4/4       2117964 ns       830078 ns          640 items_per_second=1.20471M/s 4p-4c
+BM_MultiThreaded<1024>/1/4       1632365 ns       687500 ns         1000 items_per_second=1.45455M/s 1p-4c
+BM_MultiThreaded<1024>/4/1       1515262 ns       920759 ns         1120 items_per_second=1086.06k/s 4p-1c
+BM_MultiThreaded<64>/2/2         1353450 ns       669643 ns         1120 items_per_second=1.49333M/s 2p-2c
+BM_MultiThreaded<256>/2/2        1257586 ns       613839 ns         1120 items_per_second=1.62909M/s 2p-2c
+BM_MultiThreaded<4096>/2/2       1277268 ns       502232 ns         1120 items_per_second=1.99111M/s 2p-2c
+<end of output>
+Test time =  48.15 sec
+----------------------------------------------------------
+Test Passed.
+"MPMCQueueBenchmark" end time: Apr 04 21:28 Eastern Daylight Time
+"MPMCQueueBenchmark" time elapsed: 00:00:48
+----------------------------------------------------------
+
+End testing: Apr 04 21:28 Eastern Daylight Time

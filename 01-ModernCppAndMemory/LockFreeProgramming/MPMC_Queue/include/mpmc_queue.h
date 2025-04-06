@@ -17,7 +17,7 @@
 #include <new>
 
 // Alignment set once
-
+/*
 // Ensure cache line alignment to prevent false sharing
 constexpr size_t CACHE_LINE_SIZE = 64;
 
@@ -43,6 +43,7 @@ struct alignas(CACHE_LINE_SIZE) CacheLineAligned {
         return data;
     }
 };
+*/
 
 // Alignment width set at instantiation
 /**
@@ -51,7 +52,7 @@ struct alignas(CACHE_LINE_SIZE) CacheLineAligned {
  * @tparam T The type to align
  * @tparam Alignment The alignment value (must be a power of two)
  */
-/*
+
 template <typename T, size_t Alignment>
 struct alignas(Alignment) CacheAligned {
     T value;
@@ -66,7 +67,7 @@ struct alignas(Alignment) CacheAligned {
     T* operator&() noexcept { return &value; }
     const T* operator&() const noexcept { return &value; }
 };
-*/
+
 
 /**
  * @brief Lock-free multi-producer multi-consumer queue

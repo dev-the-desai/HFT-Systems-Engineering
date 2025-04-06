@@ -32,6 +32,7 @@ struct alignas(CACHE_LINE_SIZE) CacheLineAligned {
     }
 };
 
+
 /**
  * @brief A lock-free ring buffer implementation optimized for high-performance trading applications
  * 
@@ -135,6 +136,7 @@ public:
      * @param[out] result Reference to store the dequeued item
      * @return true if successful, false if the buffer is empty
      */
+    /*
     bool try_dequeue(T& result) noexcept {
         size_t tail = tail_.data.load(std::memory_order_relaxed);
         size_t head = head_.data.load(std::memory_order_acquire);
@@ -155,6 +157,34 @@ public:
         }
 
         return false;
+        
+        // Update the tail pointer with a release operation
+        //tail_.data.store(tail + 1, std::memory_order_release);
+        //return true;
+    }
+    */
+    bool try_dequeue(T& result) noexcept {
+        size_t tail = tail_.data.load(std::memory_order_relaxed);
+
+        while (true) {
+            size_t head = head_.data.load(std::memory_order_acquire);
+            if (tail >= head) {
+                return false;  // Buffer is empty
+            }
+            
+            // Move the item from the buffer
+            result = std::move(buffer_[tail & mask_]);
+            
+            // Try to update the tail pointer
+            if (tail_.data.compare_exchange_weak(tail, tail + 1, 
+                                              std::memory_order_release, 
+                                              std::memory_order_relaxed)) {
+                return true;
+            }
+            
+            // If compare_exchange fails, tail has been updated by another thread
+            // Load updated tail value and try again
+        }
     }
 
     /**
@@ -162,6 +192,7 @@ public:
      * 
      * @return std::optional<T> containing the dequeued item, or std::nullopt if empty
      */
+    /*
     std::optional<T> try_dequeue() noexcept {
         size_t tail = tail_.data.load(std::memory_order_relaxed);
         size_t head = head_.data.load(std::memory_order_acquire);
@@ -183,6 +214,33 @@ public:
 
         // If compare_exchange fails, return empty result
         return std::nullopt;
+
+        // Update the tail pointer
+        //tail_.data.store(tail + 1, std::memory_order_release);
+        //return std::optional<T>(std::move(result));
+    }
+    */
+
+    std::optional<T> try_dequeue() noexcept {
+        size_t tail = tail_.data.load(std::memory_order_relaxed);
+        while (true) {
+            size_t head = head_.data.load(std::memory_order_acquire);
+            if (tail >= head) {
+                return std::nullopt;  // Buffer is empty
+            }
+            
+            // Move the item from the buffer
+            T result = std::move(buffer_[tail & mask_]);
+            
+            // Try to update the tail pointer
+            if (tail_.data.compare_exchange_weak(tail, tail + 1, 
+                                              std::memory_order_release, 
+                                              std::memory_order_relaxed)) {
+                return std::optional<T>(std::move(result));
+            }
+            
+            // If compare_exchange fails, tail has been updated by another thread
+        }
     }
 
     /**
